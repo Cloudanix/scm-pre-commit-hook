@@ -1,0 +1,6 @@
+-   id: cloudanix-scanner
+    name: Cloudanix Scanner
+    description: Pre-commit hook that scans for secrets and vulnerabilities..
+    entry: cloudanix
+    language: python
+    stages: [commit, push, manual]
