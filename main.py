@@ -59,5 +59,5 @@ def main():
         print_vulnerabilities(results["vulnerabilities"])
 
             
-    except:
-        console.print("Failed to parse output")
+    except Exception as e:
+        console.print(f"Failed to parse output: {e}")
