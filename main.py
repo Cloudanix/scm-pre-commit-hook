@@ -47,6 +47,7 @@ def main():
     args = parser.parse_args()
     transfer_files(filenames=args.filenames)
     console = Console()
+    console.print("REACHING AT THE START")
     proc = subprocess.run(["cd dist && ./main"], shell=True, text=True, capture_output=True)
     delete_files()
     if proc.returncode != 0:
