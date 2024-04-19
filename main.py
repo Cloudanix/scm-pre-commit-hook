@@ -52,13 +52,15 @@ def main():
     delete_files()
     if proc.returncode != 0:
         console.print(f"Failed to run hook: {proc.stderr}")
-        return
+        return 0
 
     try:
         results = json.loads(proc.stdout)
         print_secrets(results["secrets"])
         print_vulnerabilities(results["vulnerabilities"])
-
+        if results["secrets"] or results["vulnerabilities"]:
+            return 1
             
     except Exception as e:
         console.print(f"Failed to parse output: {e}")
+        return 0
