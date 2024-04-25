@@ -1,7 +1,9 @@
 # scm-pre-commit-hook
-pre-commit-hook for scm
+**pre-commit-hook for scm**
+**Linux Only**
+**Requires >=Python3.8**
 
-sample .pre-commit-config:
+* Sample .pre-commit-config:
 
 ```
 repos:
