@@ -66,9 +66,10 @@ def main():
     setup_binary()
     transfer_files(filenames=args.filenames)
     console = Console()
+    console.print("Running cloudanix")
     proc = subprocess.run(["cd cloudanix/dist && ./main"], shell=True, text=True, capture_output=True)
     # delete_files()
-    console.print("Reaching here")
+    # console.print("Reaching here")
     if proc.returncode != 0:
         console.print(f"Failed to run hook: {proc.stderr}")
         return 0
