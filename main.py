@@ -18,7 +18,7 @@ def setup_binary():
     
     os.remove("linux-pre-commit.zip")
     try:
-        os.chmod("cloudanix/main", 0o755)
+        os.chmod("cloudanix/dist/main", 0o755)
     except Exception as e:
         print(f"Failed to escalate to executable permission: {e}")
 
@@ -66,10 +66,8 @@ def main():
     setup_binary()
     transfer_files(filenames=args.filenames)
     console = Console()
-    console.print("Running cloudanix")
     proc = subprocess.run(["cd cloudanix/dist && ./main"], shell=True, text=True, capture_output=True)
-    # delete_files()
-    # console.print("Reaching here")
+    delete_files()
     if proc.returncode != 0:
         console.print(f"Failed to run hook: {proc.stderr}")
         return 0
