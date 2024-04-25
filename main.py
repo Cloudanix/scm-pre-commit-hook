@@ -4,11 +4,28 @@ import shutil
 import subprocess
 import json
 from rich.console import Console
+import requests
+from zipfile import ZipFile 
+
+
+def setup_binary():
+    response = requests.get("https://console.cloudanix.com/download?file_name=linux-pre-commit.zip")
+    with open("linux-pre-commit.zip", "wb") as f:
+        f.write(response.content)
+        
+    with ZipFile("linux-pre-commit.zip", 'r') as zObject:
+        zObject.extractall(path="cloudanix/")
+    
+    os.remove("linux-pre-commit.zip")
+    try:
+        os.chmod("cloudanix/main", 0o755)
+    except Exception as e:
+        print(f"Failed to escalate to executable permission: {e}")
 
 def transfer_files(filenames): 
-    os.makedirs("dist/action", exist_ok=True)
+    os.makedirs("cloudanix/dist/action", exist_ok=True)
     for filename in filenames:
-        shutil.copy(filename, f"dist/action/{filename}")
+        shutil.copy(filename, f"cloudanix/dist/action/{filename}")
         
 def print_secrets(data: list[dict]):
     if data:
@@ -37,17 +54,18 @@ def print_vulnerabilities(data):
         print("No vulnerabilities found")
         
 def delete_files():
-    os.makedirs("dist/action", exist_ok=True)
-    shutil.rmtree("dist/action")
+    os.makedirs("cloudanix/", exist_ok=True)
+    shutil.rmtree("cloudanix")
     
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("filenames", nargs="*")
     args = parser.parse_args()
+    setup_binary()
     transfer_files(filenames=args.filenames)
     console = Console()
-    proc = subprocess.run(["cd dist && ./main"], shell=True, text=True, capture_output=True)
+    proc = subprocess.run(["cd cloudanix/dist && ./main"], shell=True, text=True, capture_output=True)
     delete_files()
     if proc.returncode != 0:
         console.print(f"Failed to run hook: {proc.stderr}")
