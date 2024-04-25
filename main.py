@@ -62,11 +62,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("filenames", nargs="*")
     args = parser.parse_args()
-    print(args.filenames)
     setup_binary()
     transfer_files(filenames=args.filenames)
     console = Console()
-    
     proc = subprocess.run(["cd cloudanix/dist && ./main"], shell=True, text=True, capture_output=True)
     delete_files()
     if proc.returncode != 0:
