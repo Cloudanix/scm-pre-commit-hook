@@ -67,6 +67,7 @@ def main():
     console = Console()
     proc = subprocess.run(["cd cloudanix/dist && ./main"], shell=True, text=True, capture_output=True)
     delete_files()
+    print("REACHING HERE")
     if proc.returncode != 0:
         console.print(f"Failed to run hook: {proc.stderr}")
         return 0
