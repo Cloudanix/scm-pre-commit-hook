@@ -66,6 +66,7 @@ def main():
     setup_binary()
     transfer_files(filenames=args.filenames)
     console = Console()
+    
     proc = subprocess.run(["cd cloudanix/dist && ./main"], shell=True, text=True, capture_output=True)
     delete_files()
     if proc.returncode != 0:
