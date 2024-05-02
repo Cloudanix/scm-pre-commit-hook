@@ -1,7 +1,9 @@
 # scm-pre-commit-hook
 **pre-commit-hook for scm**
 
-**Linux Only**
+**Code Scanning: Linux and MacOs**
+
+**Secret Scanning: Linux, MacOs and Windows**
 
 **Requires >=Python3.8**
 
