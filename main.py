@@ -48,6 +48,7 @@ def setup_binary():
 def transfer_files(filenames): 
     os.makedirs("cloudanix/dist/action", exist_ok=True)
     for filename in filenames:
+        os.makedirs(f"cloudanix/dist/action/{filename}", exist_ok=True)
         shutil.copy(filename, f"cloudanix/dist/action/{filename}")
         
 def print_secrets(data: list[dict]):
