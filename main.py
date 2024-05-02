@@ -6,17 +6,40 @@ import json
 from rich.console import Console
 import requests
 from zipfile import ZipFile 
+import platform
+
+
+BINARY_VERSION = "0.0.2"
+
+
+def get_os():
+    system_name = platform.system()
+    
+    if system_name == "Windows":
+        return "windows"
+    elif system_name == "Linux":
+        return "linux"
+    elif system_name == "Darwin":
+        return "macos"
+    else:
+        return None
+
 
 
 def setup_binary():
-    response = requests.get("https://console.cloudanix.com/download?file_name=linux-pre-commit.zip")
-    with open("linux-pre-commit.zip", "wb") as f:
-        f.write(response.content)
+    OS = get_os()
+    if not OS:
+        return False
+    zip_file = f"{OS}-pre-commit-v{BINARY_VERSION}.zip"
+    cache_path = os.path.join(os.getenv("HOME"), ".cache","pre-commit",zip_file)
+    if not os.path.exists(cache_path):
+        response = requests.get(f"https://console.cloudanix.com/download?file_name={zip_file}")
+        with open(cache_path, "wb") as f:
+            f.write(response.content)
         
-    with ZipFile("linux-pre-commit.zip", 'r') as zObject:
+    with ZipFile(cache_path, 'r') as zObject:
         zObject.extractall(path="cloudanix/")
     
-    os.remove("linux-pre-commit.zip")
     try:
         os.chmod("cloudanix/dist/main", 0o755)
     except Exception as e:
@@ -60,11 +83,15 @@ def delete_files():
 
 def main():
     parser = argparse.ArgumentParser()
+    console = Console()
     parser.add_argument("filenames", nargs="*")
     args = parser.parse_args()
-    setup_binary()
+    if setup_binary() == False:
+        console.print("Failed to setup binary")
+        return 0
+    
     transfer_files(filenames=args.filenames)
-    console = Console()
+    
     proc = subprocess.run(["cd cloudanix/dist && ./main"], shell=True, text=True, capture_output=True)
     delete_files()
     if proc.returncode != 0:
