@@ -16,28 +16,34 @@ def get_arch():
     arch = platform.machine()
     if arch == "x86_64" or "i386":
         return "amd64"
-    elif arch == "aarch64":
+
+    elif arch in ["aarch64", "arm64", "arm"]:
         return "arm"
+    
+    else:
+        return None
 
 def get_os():
     system_name = platform.system()
     
     if system_name == "Linux":
         return "linux"
+
     elif system_name == "Darwin":
         return "macos"
+
     else:
         return None
-
-
 
 def setup_binary():
     OS = get_os()
     ARCH = get_arch()
     if not OS or not ARCH:
         return False
-    zip_file = f"{OS}:{ARCH}-pre-commit-v{BINARY_VERSION}.zip"
+
+    zip_file = f"{OS}-{ARCH}-pre-commit-v{BINARY_VERSION}.zip"
     cache_path = os.path.join(os.getenv("HOME"), ".cache","pre-commit",zip_file)
+
     if not os.path.exists(cache_path):
         response = requests.get(f"https://console.cloudanix.com/download?file_name={zip_file}")
         with open(cache_path, "wb") as f:
@@ -48,6 +54,7 @@ def setup_binary():
     
     try:
         os.chmod("cloudanix/dist/main", 0o755)
+
     except Exception as e:
         print(f"Failed to escalate to executable permission: {e}")
 
@@ -100,7 +107,9 @@ def main():
     transfer_files(filenames=args.filenames)
     
     proc = subprocess.run(["cd cloudanix/dist && ./main"], shell=True, text=True, capture_output=True)
+
     delete_files()
+
     if proc.returncode != 0:
         console.print(f"Failed to run hook: {proc.stderr}")
         return 0

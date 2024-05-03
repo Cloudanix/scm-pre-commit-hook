@@ -1,2 +1,2 @@
 semgrep~=1.66
-rich
+rich~=13.7
