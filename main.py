@@ -14,7 +14,7 @@ BINARY_VERSION = "0.0.2"
 
 def get_arch():
     arch = platform.machine()
-    if arch == "x86_64":
+    if arch == "x86_64" or "i386":
         return "amd64"
     elif arch == "aarch64":
         return "arm"
