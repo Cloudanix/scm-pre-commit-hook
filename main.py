@@ -12,12 +12,17 @@ import platform
 BINARY_VERSION = "0.0.2"
 
 
+def get_arch():
+    arch = platform.machine()
+    if arch == "x86_64":
+        return "amd64"
+    elif arch == "aarch64":
+        return "arm"
+
 def get_os():
     system_name = platform.system()
     
-    if system_name == "Windows":
-        return "windows"
-    elif system_name == "Linux":
+    if system_name == "Linux":
         return "linux"
     elif system_name == "Darwin":
         return "macos"
@@ -28,9 +33,10 @@ def get_os():
 
 def setup_binary():
     OS = get_os()
-    if not OS:
+    ARCH = get_arch()
+    if not OS or not ARCH:
         return False
-    zip_file = f"{OS}-pre-commit-v{BINARY_VERSION}.zip"
+    zip_file = f"{OS}:{ARCH}-pre-commit-v{BINARY_VERSION}.zip"
     cache_path = os.path.join(os.getenv("HOME"), ".cache","pre-commit",zip_file)
     if not os.path.exists(cache_path):
         response = requests.get(f"https://console.cloudanix.com/download?file_name={zip_file}")
