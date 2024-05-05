@@ -1,15 +1,16 @@
 import argparse
+import json
 import os
+import platform
 import shutil
 import subprocess
-import json
-from rich.console import Console
+from zipfile import ZipFile
+
 import requests
-from zipfile import ZipFile 
-import platform
+from rich.console import Console
 
-
-BINARY_VERSION = "0.0.2"
+BINARY_VERSION = "v0.0.2"
+console = Console()
 
 
 def get_arch():
@@ -19,13 +20,14 @@ def get_arch():
 
     elif arch in ["aarch64", "arm64", "arm"]:
         return "arm"
-    
+
     else:
         return None
 
+
 def get_os():
     system_name = platform.system()
-    
+
     if system_name == "Linux":
         return "linux"
 
@@ -35,38 +37,69 @@ def get_os():
     else:
         return None
 
+
 def setup_binary():
     OS = get_os()
     ARCH = get_arch()
     if not OS or not ARCH:
+        console.print("Failed to determine OS and Architecture of the machine")
         return False
 
-    zip_file = f"{OS}-{ARCH}-pre-commit-v{BINARY_VERSION}.zip"
-    cache_path = os.path.join(os.getenv("HOME"), ".cache","pre-commit",zip_file)
+    console.print(f"Downloading scanner for {OS} - {ARCH}")
+
+    cache_path = os.path.join(os.getenv("HOME"), ".cache", "pre-commit")
+    console.print(f"Cache Path: {cache_path}")
 
     if not os.path.exists(cache_path):
-        response = requests.get(f"https://console.cloudanix.com/download?file_name={zip_file}")
-        with open(cache_path, "wb") as f:
-            f.write(response.content)
-        
-    with ZipFile(cache_path, 'r') as zObject:
-        zObject.extractall(path="cloudanix/")
-    
+        os.makedirs(cache_path, exist_ok=True)
+
+    scanner_archive = f"{OS}-{ARCH}-pre-commit-{BINARY_VERSION}.zip"
+    scanner_archive_path = os.path.join(cache_path, scanner_archive)
+    console.print(f"Scanner archive Path: {scanner_archive_path}")
+
+    if not os.path.exists(scanner_archive_path):
+        console.print(f"Latest version is getting downloaded: {BINARY_VERSION}")
+
+        scanner_download_url = f"http://localhost:3000/download?file_name={scanner_archive}"
+        response = requests.get(scanner_download_url)
+        if response.status_code == 200:
+            with open(scanner_archive_path, "wb") as f:
+                f.write(response.content)
+
+            console.print(f"Latest version downloaded successfully: {scanner_download_url}")
+
+        else:
+            console.print(f"Failed to upgrade scanner: {scanner_download_url}")
+            return False
+
+    if os.path.exists(scanner_archive_path):
+        console.print(f"Latest version of scanner available: {BINARY_VERSION}")
+
+    else:
+        return False
+
     try:
+        with ZipFile(scanner_archive_path, 'r') as zObject:
+            zObject.extractall(path="cloudanix/")
+
         os.chmod("cloudanix/dist/main", 0o755)
 
+        return True
+
     except Exception as e:
-        print(f"Failed to escalate to executable permission: {e}")
+        console.print(f"Failed to elevate privileges for scanner: {e}")
+        return False
 
 def transfer_files(filenames): 
     os.makedirs("cloudanix/dist/action", exist_ok=True)
+
     for filename in filenames:
         os.makedirs(f"cloudanix/dist/action/{filename}", exist_ok=True)
         shutil.copy(filename, f"cloudanix/dist/action/{filename}")
-        
+
+
 def print_secrets(data: list[dict]):
     if data:
-        console = Console()
         console.print("[bold][red][center]Secrets:")
         for result in data:
             console.print(f"[bold] {result['regex']}")
@@ -75,9 +108,9 @@ def print_secrets(data: list[dict]):
             console.print(f"[#FFFFFF]Line number: {result['lineNumber']}")
             console.print("\n")
 
+
 def print_vulnerabilities(data):
     if data:
-        console = Console()
         console.print("[bold][red][center]Vulnerabilities:")
         for result in data:
             console.print(f"[bold] {result['category']}")
@@ -88,39 +121,60 @@ def print_vulnerabilities(data):
             console.print("\n")
 
     else:
-        print("No vulnerabilities found")
-        
+        console.print("No vulnerabilities found")
+
+
 def delete_files():
     os.makedirs("cloudanix/", exist_ok=True)
     shutil.rmtree("cloudanix")
-    
+
 
 def main():
     parser = argparse.ArgumentParser()
-    console = Console()
     parser.add_argument("filenames", nargs="*")
     args = parser.parse_args()
-    if setup_binary() == False:
-        console.print("Failed to setup binary")
-        return 0
-    
-    transfer_files(filenames=args.filenames)
-    
-    proc = subprocess.run(["cd cloudanix/dist && ./main"], shell=True, text=True, capture_output=True)
 
-    delete_files()
-
-    if proc.returncode != 0:
-        console.print(f"Failed to run hook: {proc.stderr}")
-        return 0
+    console.print(f"Processing files: {args.filenames}")
 
     try:
-        results = json.loads(proc.stdout)
-        print_secrets(results["secrets"])
-        print_vulnerabilities(results["vulnerabilities"])
-        if results["secrets"] or results["vulnerabilities"]:
-            return 1
-            
+        if setup_binary() is False:
+            console.print("Failed to setup binary")
+            return 0
+
+        transfer_files(filenames=args.filenames)
+
+        proc = subprocess.run(["cd cloudanix/dist && ./main"], shell=True, text=True, capture_output=True)
+
+        if proc.returncode != 0:
+            console.print(f"Failed to run hook: {proc.stderr}")
+            return 0
+
+        try:
+            results = json.loads(proc.stdout)
+            if results.get("secrets"):
+                print_secrets(results["secrets"])
+
+            else:
+                console.print("No secrets found")
+
+            if results.get("vulnerabilities"):
+                print_vulnerabilities(results["vulnerabilities"])
+
+            else:
+                console.print("No vulnerabilities found")
+
+            if results["secrets"] or results["vulnerabilities"]:
+                return 1
+
+        except Exception as e:
+            console.print(f"Failed to parse output: {e}")
+            return 0
+
     except Exception as e:
-        console.print(f"Failed to parse output: {e}")
+        console.print(f"Failed to scan files for Secrets or Vulnerabilities: {e}")
         return 0
+
+    finally:
+        delete_files()
+
+    return 0

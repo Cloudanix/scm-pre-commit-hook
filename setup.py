@@ -12,8 +12,8 @@ setup(
     py_modules=["main"],
     packages=find_packages(),
     install_requires=[requirements],
-    python_requires=">=3.8",
-    platforms=["Linux"],
+    python_requires=">=3.10",
+    platforms=["any"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: POSIX :: Linux",
