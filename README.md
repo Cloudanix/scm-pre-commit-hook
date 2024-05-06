@@ -9,9 +9,9 @@
 
 ```
 repos:
--   repo: https://github.com/Cloudanix/scm-pre-commit-hook
-    rev: 9978857
+  - repo: https://github.com/Cloudanix/scm-pre-commit-hook
+    rev: v0.0.1
     hooks:
-    -   id: cloudanix-scanner
+      - id: cloudanix-scanner
         verbose: true
 ```
