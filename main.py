@@ -60,7 +60,7 @@ def setup_binary():
     if not os.path.exists(scanner_archive_path):
         console.print(f"Latest version is getting downloaded: {BINARY_VERSION}")
 
-        scanner_download_url = f"http://localhost:3000/download?file_name={scanner_archive}"
+        scanner_download_url = f"https://console.cloudanix.com/download?file_name={scanner_archive}"
         response = requests.get(scanner_download_url)
         if response.status_code == 200:
             with open(scanner_archive_path, "wb") as f:
