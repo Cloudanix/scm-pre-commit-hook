@@ -15,6 +15,8 @@ console = Console()
 
 def get_arch():
     arch = platform.machine().lower()
+    console.print(f"Architecture: {arch}")
+
     if arch == "x86_64" or "i386":
         return "amd64"
 
@@ -27,6 +29,7 @@ def get_arch():
 
 def get_os():
     system_name = platform.system().lower()
+    console.print(f"System: {system_name}")
 
     if system_name == "linux":
         return "linux"
@@ -97,9 +100,6 @@ def transfer_files(filenames):
     for filename in filenames:
         os.makedirs(f"cloudanix/dist/action/{filename}", exist_ok=True)
         shutil.copy(filename, f"cloudanix/dist/action/{filename}")
-
-    if os.path.exists("cloudanix/dist/action"):
-        shutil.rmtree("cloudanix/dist/action")
 
 
 def print_secrets(data: list[dict]):
@@ -173,6 +173,9 @@ def main():
         except Exception as e:
             console.print(f"Failed to parse output: {e}")
             return 0
+
+        # if os.path.exists("cloudanix/dist/action"):
+        #     shutil.rmtree("cloudanix/dist/action")
 
     except Exception as e:
         console.print(f"Failed to scan files for Secrets or Vulnerabilities: {e}")
