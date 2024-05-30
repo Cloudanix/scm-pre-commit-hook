@@ -85,7 +85,7 @@ def setup_scanner():
         with ZipFile(scanner_archive_path, 'r') as zObject:
             zObject.extractall(path="cloudanix/")
 
-        os.chmod("cloudanix/dist/main", 0o755)
+        os.chmod("cloudanix/main", 0o755)
 
         return True
 
@@ -95,11 +95,11 @@ def setup_scanner():
 
 
 def transfer_files(filenames): 
-    os.makedirs("cloudanix/dist/action", exist_ok=True)
+    os.makedirs("cloudanix/action", exist_ok=True)
 
     for filename in filenames:
-        os.makedirs(f"cloudanix/dist/action/{filename}", exist_ok=True)
-        shutil.copy(filename, f"cloudanix/dist/action/{filename}")
+        os.makedirs(f"cloudanix/action/{filename}", exist_ok=True)
+        shutil.copy(filename, f"cloudanix/action/{filename}")
 
 
 def print_secrets(data: list[dict]):
@@ -147,7 +147,7 @@ def main():
 
         transfer_files(filenames=args.filenames)
 
-        proc = subprocess.run(["cd cloudanix/dist && ./main"], shell=True, text=True, capture_output=True)
+        proc = subprocess.run(["cd cloudanix && ./main"], shell=True, text=True, capture_output=True)
 
         if proc.returncode != 0:
             console.print(f"Failed to run hook: {proc.stderr}")
