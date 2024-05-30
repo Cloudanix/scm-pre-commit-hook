@@ -9,7 +9,7 @@ from zipfile import ZipFile
 import requests
 from rich.console import Console
 
-BINARY_VERSION = "v0.0.2"
+BINARY_VERSION = "v0.0.3-pre"
 console = Console()
 
 
@@ -60,7 +60,7 @@ def setup_binary():
     if not os.path.exists(scanner_archive_path):
         console.print(f"Latest version is getting downloaded: {BINARY_VERSION}")
 
-        scanner_download_url = f"https://console.cloudanix.com/download?file_name={scanner_archive}"
+        scanner_download_url = f"http://localhost:3000/download?file_name={scanner_archive}"
         response = requests.get(scanner_download_url)
         if response.status_code == 200:
             with open(scanner_archive_path, "wb") as f:
@@ -90,12 +90,16 @@ def setup_binary():
         console.print(f"Failed to elevate privileges for scanner: {e}")
         return False
 
+
 def transfer_files(filenames): 
     os.makedirs("cloudanix/dist/action", exist_ok=True)
 
     for filename in filenames:
         os.makedirs(f"cloudanix/dist/action/{filename}", exist_ok=True)
         shutil.copy(filename, f"cloudanix/dist/action/{filename}")
+
+    if os.path.exists("cloudanix/dist/action"):
+        shutil.rmtree("cloudanix/dist/action")
 
 
 def print_secrets(data: list[dict]):
