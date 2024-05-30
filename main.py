@@ -17,7 +17,7 @@ def get_arch():
     arch = platform.machine().lower()
     console.print(f"Architecture: {arch}")
 
-    if arch == "x86_64" or "i386":
+    if arch in ["x86_64", "i386"]:
         return "amd64"
 
     elif arch in ["aarch64", "arm64", "arm"]:
@@ -41,7 +41,7 @@ def get_os():
         return None
 
 
-def setup_binary():
+def setup_scanner():
     OS = get_os()
     ARCH = get_arch()
     if not OS or not ARCH:
@@ -141,8 +141,8 @@ def main():
     console.print(f"Processing files: {args.filenames}")
 
     try:
-        if setup_binary() is False:
-            console.print("Failed to setup binary")
+        if setup_scanner() is False:
+            console.print("Failed to setup scanner")
             return 0
 
         transfer_files(filenames=args.filenames)
@@ -174,14 +174,13 @@ def main():
             console.print(f"Failed to parse output: {e}")
             return 0
 
-        # if os.path.exists("cloudanix/dist/action"):
-        #     shutil.rmtree("cloudanix/dist/action")
-
     except Exception as e:
         console.print(f"Failed to scan files for Secrets or Vulnerabilities: {e}")
         return 0
 
     finally:
-        delete_files()
+        # delete_files()
+        console.print("Completed scanning process")
+
 
     return 0
