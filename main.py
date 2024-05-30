@@ -9,12 +9,12 @@ from zipfile import ZipFile
 import requests
 from rich.console import Console
 
-BINARY_VERSION = "v0.0.3-pre"
+BINARY_VERSION = "v0.0.4-pre-release"
 console = Console()
 
 
 def get_arch():
-    arch = platform.machine()
+    arch = platform.machine().lower()
     if arch == "x86_64" or "i386":
         return "amd64"
 
@@ -26,12 +26,12 @@ def get_arch():
 
 
 def get_os():
-    system_name = platform.system()
+    system_name = platform.system().lower()
 
-    if system_name == "Linux":
+    if system_name == "linux":
         return "linux"
 
-    elif system_name == "Darwin":
+    elif system_name == "darwin":
         return "macos"
 
     else:
