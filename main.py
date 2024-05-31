@@ -9,7 +9,13 @@ from zipfile import ZipFile
 import requests
 from rich.console import Console
 
-BINARY_VERSION = "v0.0.4-4"
+BINARY_VERSION = "v0.0.4-5"
+
+PRE_COMMIT_VERSION = os.environ.get('PRE_COMMIT_VERSION')
+if PRE_COMMIT_VERSION:
+    print(f"PRE_COMMIT_VERSION: {PRE_COMMIT_VERSION}")
+    BINARY_VERSION = PRE_COMMIT_VERSION
+
 console = Console()
 
 
