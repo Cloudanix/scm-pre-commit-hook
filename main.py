@@ -140,46 +140,50 @@ def main():
 
     console.print(f"Processing files: {args.filenames}")
 
-    try:
-        if setup_scanner() is False:
-            console.print("Failed to setup scanner")
-            return 0
-
-        transfer_files(filenames=args.filenames)
-
-        proc = subprocess.run(["cd cloudanix && ./main"], shell=True, text=True, capture_output=True)
-
-        if proc.returncode != 0:
-            console.print(f"Failed to run hook: {proc.stderr}")
-            return 0
-
-        try:
-            results = json.loads(proc.stdout)
-            if results.get("secrets"):
-                print_secrets(results["secrets"])
-
-            else:
-                console.print("No secrets found")
-
-            if results.get("vulnerabilities"):
-                print_vulnerabilities(results["vulnerabilities"])
-
-            else:
-                console.print("No vulnerabilities found")
-
-            if results["secrets"] or results["vulnerabilities"]:
-                return 1
-
-        except Exception as e:
-            console.print(f"Failed to parse output: {e}")
-            return 0
-
-    except Exception as e:
-        console.print(f"Failed to scan files for Secrets or Vulnerabilities: {e}")
+    # try:
+    if setup_scanner() is False:
+        console.print("Failed to setup scanner")
         return 0
 
-    finally:
-        # delete_files()
-        console.print("Completed scanning process")
+    transfer_files(filenames=args.filenames)
+
+    proc = subprocess.run(["cd cloudanix && ./main"], shell=True, text=True, capture_output=True)
+    print(proc.returncode)
+    print(proc.stdout)
+    print(proc.stderr)
+    if proc.returncode != 0:
+        console.print(f"Failed to run hook: {proc.stderr}")
+        return 0
+
+    # try:
+    results = json.loads(proc.stdout)
+    if results.get("secrets"):
+        print_secrets(results["secrets"])
+
+    else:
+        console.print("No secrets found")
+
+    if results.get("vulnerabilities"):
+        print_vulnerabilities(results["vulnerabilities"])
+
+    else:
+        console.print("No vulnerabilities found")
+
+    if results["secrets"] or results["vulnerabilities"]:
+        print(results)
+        return 1
+
+    # except Exception as e:
+    #     console.print(f"Failed to parse output: {e}")
+    #     return 0
+
+    # except Exception as e:
+    #     console.print(f"Failed to scan files for Secrets or Vulnerabilities: {e}")
+    #     return 0
+
+    # finally:
+    # delete_files()
+
+    console.print("Completed scanning process")
 
     return 0
