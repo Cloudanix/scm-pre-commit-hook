@@ -9,7 +9,7 @@ from zipfile import ZipFile
 import requests
 from rich.console import Console
 
-BINARY_VERSION = "v0.0.4-pre-release"
+BINARY_VERSION = "v0.0.4-4"
 console = Console()
 
 
@@ -181,6 +181,5 @@ def main():
     finally:
         # delete_files()
         console.print("Completed scanning process")
-
 
     return 0
