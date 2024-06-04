@@ -112,7 +112,7 @@ def print_secrets(data: list[dict]):
     if data:
         console.print("[bold][red][center]Secrets:")
         for result in data:
-            console.print(f"[bold] {result['regex']}")
+            console.print(f"[bold]{result['regex']}")
             console.print(f"[#FFFFFF]File: {result['fileName']}")
             console.print(f"[#FFFFFF]Hashed Value: {result['hashedValue']}")
             console.print(f"[#FFFFFF]Line number: {result['lineNumber']}")
@@ -123,7 +123,7 @@ def print_vulnerabilities(data):
     if data:
         console.print("[bold][red][center]Vulnerabilities:")
         for result in data:
-            console.print(f"[bold] {result['category']}")
+            console.print(f"[bold]{result['category']}")
             console.print(f"[#FFFFFF]File: {result['path']}")
             console.print(f"[#FFFFFF]lines: {result['lines']}")
             console.print(f"[#FFFFFF]{result['message']}")
